@@ -625,6 +625,14 @@ form.addEventListener("submit", function(e){
       trackEvent("form_submit", payload);
       form.style.display = "none";
       formSuccess.classList.add("show");
+
+      // Evento sem dados pessoais para acionar a conversão no Google Tag Manager.
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "lead_form_success",
+        form_name: "lead_form",
+        conversion_name: "lead_form"
+      });
     })
     .catch(error => {
       console.error("[erro ao enviar lead para a planilha]", error);
