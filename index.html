@@ -181,12 +181,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   /* ---------- empreendimentos ---------- */
   .dev-rail{
     display:flex; gap:clamp(18px,3vw,32px); overflow-x:auto; scroll-snap-type:x proximity;
-    padding-bottom:8px;
+    align-items:flex-start; padding-bottom:32px; touch-action:pan-x; cursor:grab;
     -ms-overflow-style:none; scrollbar-width:none;
   }
+  .dev-rail:active{ cursor:grabbing; }
   .dev-rail::-webkit-scrollbar{ display:none; }
   .dev-card{
-    flex:0 0 clamp(260px, 68vw, 380px); scroll-snap-align:start;
+    flex:0 0 clamp(260px, 68vw, 380px); height:auto; scroll-snap-align:start;
   }
   /* Real spacer items (not padding/margin on the scroller or its first/last child):
      scroll-snap-type recalculates on load and silently cancels start-side
@@ -195,7 +196,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .dev-spacer{ flex:0 0 var(--edge); scroll-snap-align:none; }
   .dev-spacer:first-child{ scroll-snap-align:start; }
   .dev-card .placeholder{ aspect-ratio:3/4; }
-  .dev-card .dev-info{ padding-top:18px; }
+  .dev-card .dev-img{ width:100%; height:auto; aspect-ratio:3/4; object-fit:cover; }
+  .dev-card .dev-info{ padding:18px 0 24px; background:var(--white); }
   .dev-card h3{ font-size:22px; color:var(--navy); }
   .dev-card .loc{ font-size:13.5px; color:var(--muted-on-light); margin-top:6px; }
   .dev-card .extra{ font-size:13px; color:var(--gold); margin-top:10px; }
@@ -502,6 +504,72 @@ const revealObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.18 });
 document.querySelectorAll(".reveal").forEach(el => revealObserver.observe(el));
+
+/* =========================================================
+   Carrossel automático dos empreendimentos
+   ========================================================= */
+const devRail = document.querySelector(".dev-rail");
+if (devRail && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  const originalItems = Array.from(devRail.children);
+  const clonedItems = originalItems.map(item => {
+    const clone = item.cloneNode(true);
+    clone.setAttribute("aria-hidden", "true");
+    clone.querySelectorAll("a, button, input, select, textarea").forEach(control => {
+      control.setAttribute("tabindex", "-1");
+    });
+    return clone;
+  });
+  const firstClone = clonedItems[0];
+  devRail.append(...clonedItems);
+
+  const cycleWidth = firstClone.offsetLeft - originalItems[0].offsetLeft;
+  const defaultSnap = getComputedStyle(devRail).scrollSnapType;
+  const speed = 26;
+  let pausedByInteraction = false;
+  let lastFrame = performance.now();
+
+  function isPaused(){
+    return pausedByInteraction;
+  }
+
+  function updateSnap(){
+    devRail.style.scrollSnapType = isPaused() ? defaultSnap : "none";
+  }
+
+  function pauseForInteraction(){
+    pausedByInteraction = true;
+    updateSnap();
+  }
+
+  function resumeAfterInteraction(){
+    pausedByInteraction = false;
+    lastFrame = performance.now();
+    updateSnap();
+  }
+
+  devRail.addEventListener("pointerdown", pauseForInteraction, { passive:true });
+  document.addEventListener("pointerup", resumeAfterInteraction, { passive:true });
+  document.addEventListener("pointercancel", resumeAfterInteraction, { passive:true });
+  devRail.addEventListener("focusin", pauseForInteraction);
+  devRail.addEventListener("focusout", resumeAfterInteraction);
+
+  function animateDevRail(now){
+    const elapsed = Math.min(now - lastFrame, 50);
+    lastFrame = now;
+
+    if (!isPaused() && cycleWidth > 0 && devRail.scrollWidth > devRail.clientWidth){
+      devRail.scrollLeft += speed * elapsed / 1000;
+      if (devRail.scrollLeft >= cycleWidth){
+        devRail.scrollLeft -= cycleWidth;
+      }
+    }
+
+    requestAnimationFrame(animateDevRail);
+  }
+
+  updateSnap();
+  requestAnimationFrame(animateDevRail);
+}
 
 /* =========================================================
    Count-up numbers (Valorização)
