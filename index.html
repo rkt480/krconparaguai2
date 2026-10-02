@@ -99,6 +99,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     color:var(--white); overflow:hidden;
   }
   .hero .placeholder{ position:absolute; inset:0; align-items:flex-start; justify-content:center; padding-top: clamp(90px,14vh,160px); }
+  .hero-logo{
+    position:absolute; top:clamp(130px,20vh,200px); left:var(--edge); z-index:2;
+    width:min(220px,50vw); height:auto;
+  }
+  @media (min-width:901px){
+    .hero-logo{
+      top:clamp(32px,5vh,72px);
+      left:calc((100% - 760px)/2 + var(--edge));
+      width:min(220px,20vw);
+    }
+  }
   .hero::after{
     content:''; position:absolute; inset:0;
     background:linear-gradient(180deg, rgba(14,26,51,.15) 0%, rgba(14,26,51,.35) 55%, rgba(14,26,51,.86) 100%);
@@ -264,8 +275,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- ============ HERO ============ -->
 <section class="hero">
   <img src="images/hero-itapema.jpg" alt="Itapema, Santa Catarina" class="hero-img">
+  <img src="images/logo-new.png" alt="KRCON Empreendimentos" class="hero-logo">
   <div class="container hero-content">
-    <div class="hero-eyebrow">Itapema, Santa Catarina</div>
     <h1>Itapema, Santa Catarina.</h1>
     <div class="sub">Uno de los mercados inmobiliarios que más se destacan en Brasil.</div>
     <p class="desc">Conozca de cerca la ciudad, sus números y una trayectoria de 19 años construida por KRCON.</p>
